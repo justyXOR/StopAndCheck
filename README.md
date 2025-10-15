@@ -6,7 +6,7 @@
 
 # Commands
 `/sac` - Main command. Show help menu.<br>
-`/sac reload` - Reloading config-file.<br>
+`/sac reload` - Reloads config-file.<br>
 `/sac info <player>` - Shows player's check information **(IN DEV!)**.<br>
 `/sac check <player>` - Calls player to checking.<br>
 `/sac free <player>` - Releases player from checking.<br>
