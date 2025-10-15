@@ -1,29 +1,29 @@
 # Information
-*Plugin for call players to cheat checking.*
+*Plugin for call players to cheat checking.* <br>
 
 **Versions:** 1.18.2 and higher (JDK 17+)<br>
-**Developed for:** Paper
+**Developed for:** Paper<br>
 
 # Commands
-`/sac` - Main command. Show help menu.
-`/sac reload` - Reloading config-file.
-`/sac info <player>` - Shows player's check information **(IN DEV!)**.
-`/sac check <player>` - Calls player to checking.
-`/sac free <player>` - Releases player from checking.
+`/sac` - Main command. Show help menu.<br>
+`/sac reload` - Reloading config-file.<br>
+`/sac info <player>` - Shows player's check information **(IN DEV!)**.<br>
+`/sac check <player>` - Calls player to checking.<br>
+`/sac free <player>` - Releases player from checking.<br>
 
 # Permissions
-`/sac` - `sac.command`
-*Immunity to checks* - `sac.immunity` **(IN DEV!)**
-`/sac reload` - `sac.moder.reload`
-`/sac info` - `sac.moder.info`
-`/sac check` - `sac.moder.check`
-`/sac free` - `sac.moder.free`
+`/sac` - `sac.command`<br>
+*Immunity to checks* - `sac.immunity` **(IN DEV!)** <br>
+`/sac reload` - `sac.moder.reload`<br>
+`/sac info` - `sac.moder.info`<br>
+`/sac check` - `sac.moder.check`<br>
+`/sac free` - `sac.moder.free`<br>
 
 # Aliases
-You can replace **/sac** command with:
-- /stopandcheck
-- /cheatcheck
-- /scheck
-- /ccheck
+You can replace **/sac** command with:<br>
+- /stopandcheck<br>
+- /cheatcheck<br>
+- /scheck<br>
+- /ccheck<br>
 
 **Example:** `/scheck check BadPlayer013`
