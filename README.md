@@ -1,5 +1,7 @@
 ![STOP AND CHECK](https://i.ibb.co/qMMkNWw9/SAC-banner-smaller.png)
 
+[![StopAndCheck](https://img.shields.io/hangar/dt/StopAndCheck?link=https%3A%2F%2Fhangar.papermc.io%2Fxordev%2FStopAndCheck&style=for-the-badge)](https://hangar.papermc.io/xordev/StopAndCheck)
+
 # Information
 *Plugin for call players to cheat checking.* <br>
 
