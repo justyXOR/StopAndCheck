@@ -21,6 +21,7 @@ messages:
   moderator:
     no-permission: "&7[&6&lStopAndCheck&7] &fВы не имеете нужеых прав!"
     self-check: "&7[&6&lStopAndCheck&7] &fВы не можете вызвать себя на проверку"
+    self-free: "&7[&6&lStopAndCheck&7] &fДаже не пробуй себя снять с проверки! >:("
     is-checking: "&7[&6&lStopAndCheck&7] &f{player} проверяет другого игрока"
     successful-called: "&7[&6&lStopAndCheck&7] &f{player} был вызван на проверку"
     successful-free: "&7[&6&lStopAndCheck&7] &fВы отпустили {player} с проверки"

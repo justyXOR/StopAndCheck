@@ -54,6 +54,7 @@ public final class Main extends JavaPlugin {
 
         for (Player player : getServer().getOnlinePlayers()) {
             removeMetadataByPrefix(player, "sac_");
+            player.sendTitle("", "", 0, 0, 10);
         }
 
         getLogger().info("Cleaning up permissions...");
