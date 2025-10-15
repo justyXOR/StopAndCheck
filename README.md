@@ -1,3 +1,5 @@
+![STOP AND CHECK](https://i.ibb.co/6Jq78bGK/ASC-BANNER.png)
+
 # Information
 *Plugin for call players to cheat checking.* <br>
 
