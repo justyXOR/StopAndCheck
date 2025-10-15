@@ -1,0 +1,50 @@
+#  StopAndCheck 1.0-BETA конфиг
+#  https://github.com/justyXOR/StopAndCheck
+
+#  Плейсхолдеры:
+#    {player} - Заменяется на имя игрока вызванного на проверку
+#    {moderator} - Заменяется на имя модератор вызвавшего на проверку
+
+check:
+  can-move: false
+  can-command: false
+  can-drop-items: false
+  teleport-to-moder: true
+  on-disconnect:
+    enabled: true
+    command: "tempban {player} 30d Уход с проверки"
+
+messages:
+  check-chat-tag: "&7[&bПроверка&7] &f"
+  you-tag: "&7[&9Вы&7]&r"
+  cfg-reload: "&7[&6&lStopAndCheck&7] &fКонфиг перезагружен"
+  moderator:
+    no-permission: "&7[&6&lStopAndCheck&7] &fВы не имеете нужеых прав!"
+    self-check: "&7[&6&lStopAndCheck&7] &fВы не можете вызвать себя на проверку"
+    is-checking: "&7[&6&lStopAndCheck&7] &f{player} проверяет другого игрока"
+    successful-called: "&7[&6&lStopAndCheck&7] &f{player} был вызван на проверку"
+    successful-free: "&7[&6&lStopAndCheck&7] &fВы отпустили {player} с проверки"
+    player-offline: "&7[&6&lStopAndCheck&7] &fИгрок оффлайн"
+    player-has-perm: "&7[&6&lStopAndCheck&7] &f{player} имеет иммунитет к проверкам"
+    already-check: "&7[&6&lStopAndCheck&7] &f{player} уже на проверке"
+    already-free: "&7[&6&lStopAndCheck&7] &f{player} не на проверке"
+  player:
+    check-title: "&c&lПРОВЕРКА НА ЧИТЫ"
+    check-subtitle: "Инструкция в чате"
+    free-msg: "&7[&6&lStopAndCheck&7] &aВас отпустили с проверки"
+    check-chatmsg:
+      - ""
+      - "&7- &c&lВы подозреваетесь в читерстве"
+      - "&7модератором {moderator}"
+      - ""
+      - "&71. &fНапишите свой ник Discord в чат"
+      - "&72. &fВыход с сервера = &cбан 30d"
+      - "&73. &fВы можете общаться с модератором через чат"
+      - "&74. &fВы не можете двигаться, писать команды, и выкидывать предметы"
+      - ""
+    help:
+      - "&a/sac check <player> - Вызов игрока на проверку"
+      - "&a/sac free <player> - Отпуск игрока с проверки"
+      - "&a/sac reload - Перезагрузить конфиг"
+      - "&a/sac help - Это меню"
+      - "&a/sac info <player> - Информация о игроке"
