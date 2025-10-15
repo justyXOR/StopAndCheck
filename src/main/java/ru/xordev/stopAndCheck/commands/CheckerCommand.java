@@ -22,11 +22,6 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
-        if (!(commandSender instanceof Player)) {
-            plugin.getServer().getLogger().log(Level.INFO, "Console can't check player!");
-            return true;
-        }
-
         Player sender = (Player) commandSender;
 
         if (!(sender.hasPermission("sac.command"))) {
@@ -40,6 +35,10 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
         }
 
         if (strings[0].equalsIgnoreCase("check")) {
+            if (!(commandSender instanceof Player)) {
+                plugin.getServer().getLogger().log(Level.INFO, "Console can't check player!");
+                return true;
+            }
             if (!(sender.hasPermission("sac.moder.check"))) {
                 sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.no-permission")));
                 return true;

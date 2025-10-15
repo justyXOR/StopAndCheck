@@ -23,6 +23,7 @@ public final class Main extends JavaPlugin {
 
             pm.addPermission(new Permission("sac.command", "Access to /sac command", PermissionDefault.OP));
             pm.addPermission(new Permission("sac.immunity", "Deny send player to checks", PermissionDefault.OP));
+            pm.addPermission(new Permission("sac.help", "Access to /help command", PermissionDefault.OP));
 
             Permission moderPerm = new Permission("sac.moder.*", "Allow all moderator commands", PermissionDefault.OP);
             moderPerm.getChildren().put("sac.moder.reload", true);
@@ -39,23 +40,43 @@ public final class Main extends JavaPlugin {
             getServer().getLogger().log(Level.INFO,"-| StopAndCheck 1.0beta by XOR |-");
             getServer().getLogger().log(Level.INFO,"All releases here: https://github.com/justyXOR/StopAndCheck");
             getServer().getLogger().log(Level.INFO," ");
-            getServer().getLogger().log(Level.INFO,"[StopAndCheck] Plugin is ready to work!");
+            getServer().getLogger().log(Level.INFO,"Plugin is ready to work!");
             getServer().getLogger().log(Level.INFO," ");
         } catch (Exception e) {
-            getLogger().log(Level.SEVERE,"[StopAndCheck] Error when enabling plugin!", e);
+            getLogger().log(Level.SEVERE,"Error when enabling plugin!", e);
             getServer().getPluginManager().disablePlugin(this);
         }
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("[StopAndCheck]  Cleaning up metadata...");
+        getLogger().info("Cleaning up metadata...");
 
         for (Player player : getServer().getOnlinePlayers()) {
             removeMetadataByPrefix(player, "sac_");
         }
 
-        getLogger().info("[StopAndCheck] See you next time!");
+        getLogger().info("Cleaning up permissions...");
+
+        unregisterPermissions();
+
+        getLogger().info("See you next time!");
+    }
+
+    private void unregisterPermissions() {
+        PluginManager pm = getServer().getPluginManager();
+        String[] permissionsToRemove = {
+                "sac.command", "sac.immunity", "sac.help",
+                "sac.moder.reload", "sac.moder.check", "sac.moder.free", "sac.moder.info",
+                "sac.moder.*"
+        };
+
+        for (String permName : permissionsToRemove) {
+            Permission perm = pm.getPermission(permName);
+            if (perm != null) {
+                pm.removePermission(perm);
+            }
+        }
     }
 
     private void removeMetadataByPrefix(Player player, String prefix) {

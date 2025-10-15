@@ -2,7 +2,7 @@ name: StopAndCheck
 version: '1.0-BETA'
 main: ru.xordev.stopAndCheck.Main
 api-version: '1.18'
-prefix: [ SAC ]
+prefix: SAC
 authors: [ XOR.dev ]
 description: Freeze a player with one command and calmly check him
 website: https://www.spigotmc.org/members/xordev.2397607
