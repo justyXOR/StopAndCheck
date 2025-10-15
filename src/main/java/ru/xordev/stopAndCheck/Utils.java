@@ -3,8 +3,6 @@ package ru.xordev.stopAndCheck;
 import org.bukkit.ChatColor;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.List;
-
 public class Utils {
     private final JavaPlugin plugin;
 

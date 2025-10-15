@@ -1,12 +1,7 @@
 package ru.xordev.stopAndCheck.commands;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.Title;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.command.*;
-import org.bukkit.entity.Explosive;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
@@ -15,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.xordev.stopAndCheck.Utils;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.logging.Level;
 
