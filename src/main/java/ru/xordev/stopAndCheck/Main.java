@@ -38,7 +38,7 @@ public final class Main extends JavaPlugin {
             Objects.requireNonNull(getServer().getPluginCommand("sac")).setExecutor(new CheckerCommand(this));
 
             getServer().getLogger().log(Level.INFO," ");
-            getServer().getLogger().log(Level.INFO,"-| StopAndCheck 1.0beta by XOR |-");
+            getServer().getLogger().log(Level.INFO,"-| StopAndCheck 1.2.1beta by XOR |-");
             getServer().getLogger().log(Level.INFO,"All releases here: https://github.com/justyXOR/StopAndCheck");
             getServer().getLogger().log(Level.INFO," ");
             getServer().getLogger().log(Level.INFO,"Plugin is ready to work!");

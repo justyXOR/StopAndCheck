@@ -35,6 +35,9 @@ public class CheckerEventHandler implements Listener {
         Player player = e.getPlayer();
 
         if (isPlayerOnCheck(player)) {
+            player.setAllowFlight(true);
+            player.setFlying(false);
+
             e.setCancelled(true);
         }
     }
@@ -118,12 +121,12 @@ public class CheckerEventHandler implements Listener {
 
             e.setCancelled(true);
 
-            String playerMsg = utils.get_str("messages.check-chat-tag", player, null) + " &7" + player.getName() + ": &r" + text;
+            String playerMsg = utils.get_str("messages.check-chat-tag", player, null) + "&7" + player.getName() + ": &r" + text;
             String targetMsg = utils.get_str("messages.you-tag", player, null) + utils.get_str("messages.check-chat-tag", player, null) + " " + text;
 
-            moderator.sendMessage(playerMsg);
-            player.sendMessage(targetMsg);
-        } else if (player.hasMetadata("sac_check_player") && player.getMetadata("sac_check_player").get(0).value() != null) {
+            moderator.sendMessage(utils.color(playerMsg));
+            player.sendMessage(utils.color(targetMsg));
+        } else if (player.hasMetadata("sac_check_player")) {
             String text = e.getMessage();
             UUID ply_uuid = UUID.fromString(player.getMetadata("sac_check_player").get(0).asString());
 
@@ -131,11 +134,11 @@ public class CheckerEventHandler implements Listener {
 
             e.setCancelled(true);
 
-            String playerMsg = utils.get_str("messages.check-chat-tag", player, null) + " &7" + player.getName() + ": &r" + text;
+            String playerMsg = utils.get_str("messages.check-chat-tag", player, null) + "&7" + player.getName() + ": &r" + text;
             String targetMsg = utils.get_str("messages.you-tag", player, null) + utils.get_str("messages.check-chat-tag", player, null) + " " + text;
 
-            ply.sendMessage(playerMsg);
-            player.sendMessage(targetMsg);
+            ply.sendMessage(utils.color(playerMsg));
+            player.sendMessage(utils.color(targetMsg));
         }
     }
 

@@ -91,14 +91,25 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
 
             player.setMetadata("sac_oncheck", new FixedMetadataValue(plugin, true));
             player.setMetadata("sac_check_moderator", new FixedMetadataValue(plugin, sender.getUniqueId().toString()));
-            player.setMetadata("sac_beforecheck_pos", new FixedMetadataValue(plugin, player.getLocation()));
 
             sender.setMetadata("sac_check_player", new FixedMetadataValue(plugin, player.getUniqueId().toString()));
 
             String title = utils.get_str("messages.player.check-title", sender, player);
             String subtitle = utils.get_str("messages.player.check-subtitle", sender, player);
 
-            player.teleport(sender.getLocation());
+            if (plugin.getConfig().getBoolean("check.teleport.enabled")) {
+                player.setMetadata("sac_beforecheck_pos", new FixedMetadataValue(plugin, player.getLocation()));
+
+                String coords = plugin.getConfig().getString("check.teleport.coordinates", "0 0 0 0 0");
+                String wrld = plugin.getConfig().getString("check.teleport.world", "world");
+
+                Location loc = utils.parse_location(coords, wrld, " ");
+
+                sender.setMetadata("sac_beforecheck_pos", new FixedMetadataValue(plugin, sender.getLocation()));
+
+                player.teleport(loc);
+                sender.teleport(loc);
+            }
 
             player.sendTitle(title, subtitle, 10, 999999, 0);
 
@@ -144,11 +155,18 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
 
             playerModerator.removeMetadata("sac_check_player", plugin);
 
-            Location oldPos = (Location) player.getMetadata("sac_beforecheck_pos").get(0).value();
+            player.setAllowFlight(false);
 
-            player.removeMetadata("sac_beforecheck_pos", plugin);
+            if (plugin.getConfig().getBoolean("check.teleport.enabled")) {
+                Location oldPos = (Location) player.getMetadata("sac_beforecheck_pos").get(0).value();
+                Location oldModPos = (Location) Objects.requireNonNull(sender).getMetadata("sac_beforecheck_pos").get(0).value();
 
-            player.teleport(oldPos);
+                player.removeMetadata("sac_beforecheck_pos", plugin);
+                sender.removeMetadata("sac_beforecheck_pos", plugin);
+
+                player.teleport(oldPos);
+                sender.teleport(oldModPos);
+            }
 
             player.sendTitle("", "", 0, 0, 10);
 

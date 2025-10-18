@@ -1,15 +1,22 @@
 package ru.xordev.stopAndCheck;
 
-import org.bukkit.ChatColor;
+//import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Utils {
     private final JavaPlugin plugin;
@@ -19,7 +26,51 @@ public class Utils {
     }
 
     public String color(String msg) {
-        return ChatColor.translateAlternateColorCodes('&', msg);
+        if (msg == null) return null;
+        msg = processHexColors(msg);
+        msg = ChatColor.translateAlternateColorCodes('&', msg);
+        return msg;
+    }
+
+    public Location parse_location(@NotNull String coordinates, String world, String split_by) {
+        String[] coordArray = coordinates.split(split_by);
+        double x = Double.parseDouble(coordArray[0]);
+        double y = Double.parseDouble(coordArray[1]);
+        double z = Double.parseDouble(coordArray[2]);
+
+        World to = Bukkit.getWorld(world);
+
+        if (to == null) throw new IllegalArgumentException("World " + world + " not found");
+
+        Location loc = new Location(to, x, y, z);
+
+        if (coordArray.length >= 5) {
+            float yaw = Float.parseFloat(coordArray[3].trim());
+            float pitch = Float.parseFloat(coordArray[4].trim());
+            loc.setYaw(yaw);
+            loc.setPitch(pitch);
+        }
+
+        return loc;
+    }
+
+    private String processHexColors(String message) {
+        try {
+            Pattern pattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
+            Matcher matcher = pattern.matcher(message);
+            StringBuffer buffer = new StringBuffer();
+
+            while (matcher.find()) {
+                String hex = matcher.group(1);
+                ChatColor color = ChatColor.of("#" + hex);
+                matcher.appendReplacement(buffer, color.toString());
+            }
+            matcher.appendTail(buffer);
+
+            return buffer.toString();
+        } catch (Exception e) {
+            return message;
+        }
     }
 
     public String get_str(String path, @Nullable Player moderator, @Nullable Player player) {

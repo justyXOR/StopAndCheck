@@ -6,7 +6,10 @@
 #    {executor} - Replaced by the player who executed the command
 
 check:
-  teleport-to-moder: true
+  teleport:
+    enabled: false
+    world: "world"
+    coordinates: "-106 107 -12 0 0"   # Format: "X Y Z Yaw Pitch". Yaw and Pitch is optional
   on-disconnect:
     enabled: true
     command: "tempban {player} 60d Left from check"
