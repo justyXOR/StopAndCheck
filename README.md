@@ -8,7 +8,7 @@
 
 **Versions:** 1.18.2 and higher (JDK 17+)<br>
 **Developed for:** Paper<br>
-**Download from:** [Modrinth](https://modrinth.com/plugin/stopandcheck), [PaperMC](https://hangar.papermc.io/xordev/StopAndCheck)
+**Download from:** [Modrinth](https://modrinth.com/plugin/stopandcheck), [PaperMC](https://hangar.papermc.io/xordev/StopAndCheck), [Spigot](https://www.spigotmc.org/resources/stopandcheck.129585/)
 
 # Commands
 `/sac` - Main command. Show help menu.<br>
