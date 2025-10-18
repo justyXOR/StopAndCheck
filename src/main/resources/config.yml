@@ -1,51 +1,61 @@
-#  StopAndCheck 1.0-BETA конфиг
+#  StopAndCheck 1.2-BETA
 #  https://github.com/justyXOR/StopAndCheck
 
-#  Плейсхолдеры:
-#    {player} - Заменяется на имя игрока вызванного на проверку
-#    {moderator} - Заменяется на имя модератор вызвавшего на проверку
+#  Placeholders:
+#    {player} - Replaced by the specified player in the command
+#    {executor} - Replaced by the player who executed the command
 
 check:
-  can-move: false
-  can-command: false
-  can-drop-items: false
   teleport-to-moder: true
   on-disconnect:
     enabled: true
-    command: "tempban {player} 30d Уход с проверки"
+    command: "tempban {player} 60d Left from check"
 
 messages:
-  check-chat-tag: "&7[&bПроверка&7] &f"
-  you-tag: "&7[&9Вы&7]&r"
-  cfg-reload: "&7[&6&lStopAndCheck&7] &fКонфиг перезагружен"
+  check-chat-tag: "&7[&bCheck&7] &f"
+  you-tag: "&7[&9You&7]&r"
+  cfg-reload: "&7[&6&lStopAndCheck&7] &fConfig reloaded"
+  usage: "&cCorrectly like this:&f"
   moderator:
-    no-permission: "&7[&6&lStopAndCheck&7] &fВы не имеете нужеых прав!"
-    self-check: "&7[&6&lStopAndCheck&7] &fВы не можете вызвать себя на проверку"
-    self-free: "&7[&6&lStopAndCheck&7] &fДаже не пробуй себя снять с проверки! >:("
-    is-checking: "&7[&6&lStopAndCheck&7] &f{player} проверяет другого игрока"
-    successful-called: "&7[&6&lStopAndCheck&7] &f{player} был вызван на проверку"
-    successful-free: "&7[&6&lStopAndCheck&7] &fВы отпустили {player} с проверки"
-    player-offline: "&7[&6&lStopAndCheck&7] &fИгрок оффлайн"
-    player-has-perm: "&7[&6&lStopAndCheck&7] &f{player} имеет иммунитет к проверкам"
-    already-check: "&7[&6&lStopAndCheck&7] &f{player} уже на проверке"
-    already-free: "&7[&6&lStopAndCheck&7] &f{player} не на проверке"
+    no-permission: "&7[&6&lStopAndCheck&7] &fYou don't have permission"
+    self-check: "&7[&6&lStopAndCheck&7] &fYou cannot call yourself to checking"
+    self-free: "&7[&6&lStopAndCheck&7] &fDon't even try to get yourself released from the checking! >:("
+    is-checking: "&7[&6&lStopAndCheck&7] &f{player} is checking another player"
+    successful-called: "&7[&6&lStopAndCheck&7] &f{player} was called in to checking"
+    successful-free: "&7[&6&lStopAndCheck&7] &fYou released {player} from check"
+    player-offline: "&7[&6&lStopAndCheck&7] &fPlayer is offline"
+    player-has-perm: "&7[&6&lStopAndCheck&7] &f{player} is immune to checks"
+    already-check: "&7[&6&lStopAndCheck&7] &f{player} already on check"
+    already-free: "&7[&6&lStopAndCheck&7] &f{player} not on a check"
+    status-oncheck: "&c&lOn check"
+    status-checking: "&b&lChecking another player"
+    status-free: "&a&lFree"
+    no: "&7No"
+    info:
+      - ""
+      - "&6&lInformation about &7{player}"
+      - ""
+      - "&7Status: {info_status}"   #THESE PLACEHOLDERS WORK ONLY HERE
+      - "&7Checking player: &6{checking_player}"
+      - "&7Checking moderator: &6{checking_moderator}"
+      - ""
   player:
-    check-title: "&c&lПРОВЕРКА НА ЧИТЫ"
-    check-subtitle: "Инструкция в чате"
-    free-msg: "&7[&6&lStopAndCheck&7] &aВас отпустили с проверки"
+    check-title: "&c&lCHEAT CHECKING"
+    check-subtitle: "See chat for instructions"
+    free-msg: "&7[&6&lStopAndCheck&7] &aYou were released from the check."
     check-chatmsg:
       - ""
-      - "&7- &c&lВы подозреваетесь в читерстве"
-      - "&7модератором {moderator}"
+      - "&c&lYou are suspected of cheating"
+      - "&7By {executor}"
       - ""
-      - "&71. &fНапишите свой ник Discord в чат"
-      - "&72. &fВыход с сервера = &cбан 30d"
-      - "&73. &fВы можете общаться с модератором через чат"
-      - "&74. &fВы не можете двигаться, писать команды, и выкидывать предметы"
+      - "&71. &fWrite your discord to chat"
+      - "&72. &fLeaving the server = ban for 60 days"
+      - "&73. &fYou can talk with moderator in the chat"
+      - "&74. &fYou cannot move, write commands, or throw objects"
       - ""
     help:
-      - "&a/sac check <player> - Вызов игрока на проверку"
-      - "&a/sac free <player> - Отпуск игрока с проверки"
-      - "&a/sac reload - Перезагрузить конфиг"
-      - "&a/sac help - Это меню"
-      - "&a/sac info <player> - Информация о игроке"
+      - "&a/sac check <player> - Call player to check"
+      - "&a/sac free <player> - Release player from check"
+      - "&a/sac reload - Reload the config"
+      - "&a/sac help - This menu"
+      - "&a/sac info <player> - Information about player"

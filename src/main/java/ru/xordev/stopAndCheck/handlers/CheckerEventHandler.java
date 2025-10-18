@@ -1,9 +1,17 @@
 package ru.xordev.stopAndCheck.handlers;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -15,9 +23,11 @@ import java.util.UUID;
 
 public class CheckerEventHandler implements Listener {
     private final JavaPlugin plugin;
+    private final Utils utils;
 
-    public CheckerEventHandler(JavaPlugin plugin) {
+    public CheckerEventHandler(JavaPlugin plugin, Utils utils) {
         this.plugin = plugin;
+        this.utils = utils;
     }
 
     @EventHandler
@@ -25,9 +35,7 @@ public class CheckerEventHandler implements Listener {
         Player player = e.getPlayer();
 
         if (isPlayerOnCheck(player)) {
-            if (!(plugin.getConfig().getBoolean("check.can-move"))) {
-                e.setCancelled(true);
-            }
+            e.setCancelled(true);
         }
     }
 
@@ -36,9 +44,7 @@ public class CheckerEventHandler implements Listener {
         Player player = e.getPlayer();
 
         if (isPlayerOnCheck(player)) {
-            if (!(plugin.getConfig().getBoolean("check.can-command"))) {
-                e.setCancelled(true);
-            }
+            e.setCancelled(true);
         }
     }
 
@@ -47,13 +53,58 @@ public class CheckerEventHandler implements Listener {
         Player player = e.getPlayer();
 
         if (isPlayerOnCheck(player)) {
-            if (!(plugin.getConfig().getBoolean("check.can-drop-items"))) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void checkPlayerBreakBlock(BlockBreakEvent e) {
+        Player player = e.getPlayer();
+
+        if (isPlayerOnCheck(player)) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void checkPlayerDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Player player) {
+            if (isPlayerOnCheck(player)) {
                 e.setCancelled(true);
             }
         }
     }
 
+    @EventHandler
+    public void checkPlayerAttack(EntityDamageByEntityEvent e) {
+        if (e.getDamager() instanceof Player damager) {
+            if (isPlayerOnCheck(damager)) {
+                e.setCancelled(true);
+                return;
+            }
+        }
 
+        if (e.getEntity() instanceof Player player) {
+            if (isPlayerOnCheck(player)) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void checkPlayerUseItem(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+        if (isPlayerOnCheck(player) && (
+                e.getAction() == Action.RIGHT_CLICK_AIR ||
+                        e.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+
+            Material itemType = player.getInventory().getItemInMainHand().getType();
+            if (itemType == Material.EGG || itemType == Material.SNOWBALL ||
+                    itemType == Material.ENDER_PEARL || itemType == Material.SPLASH_POTION) {
+                e.setCancelled(true);
+            }
+        }
+    }
 
     @EventHandler
     public void checkPlayerChat(AsyncPlayerChatEvent e) {
@@ -67,8 +118,8 @@ public class CheckerEventHandler implements Listener {
 
             e.setCancelled(true);
 
-            String playerMsg = Utils.color(plugin.getConfig().getString("messages.check-chat-tag") + "&7" + player.getName() + " ") + text;
-            String targetMsg = Utils.color(plugin.getConfig().getString("messages.you-tag") + plugin.getConfig().getString("messages.check-chat-tag")) + text;
+            String playerMsg = utils.get_str("messages.check-chat-tag", player, null) + " &7" + player.getName() + ": &r" + text;
+            String targetMsg = utils.get_str("messages.you-tag", player, null) + utils.get_str("messages.check-chat-tag", player, null) + " " + text;
 
             moderator.sendMessage(playerMsg);
             player.sendMessage(targetMsg);
@@ -80,23 +131,19 @@ public class CheckerEventHandler implements Listener {
 
             e.setCancelled(true);
 
-            String playerMsg = Utils.color(plugin.getConfig().getString("messages.check-chat-tag") + "&7" + player.getName() + ": ") + text;
-            String targetMsg = Utils.color(plugin.getConfig().getString("messages.you-tag") + plugin.getConfig().getString("messages.check-chat-tag")) + text;
+            String playerMsg = utils.get_str("messages.check-chat-tag", player, null) + " &7" + player.getName() + ": &r" + text;
+            String targetMsg = utils.get_str("messages.you-tag", player, null) + utils.get_str("messages.check-chat-tag", player, null) + " " + text;
 
             ply.sendMessage(playerMsg);
             player.sendMessage(targetMsg);
         }
     }
 
-    private void executeBan(Player player) {
+    private void executeBan(Player player, Player mod) {
         try {
-            String command = plugin.getConfig().getString("check.on-disconnect.command", "ban {player} 30d Уход с проверки");
-            String finalCommand = command.replace("{player}", player.getName());
-
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), utils.get_str("check.on-disconnect.command", mod, player));
 
             plugin.getLogger().info(player.getName() + " leaved from check");
-
         } catch (Exception e) {
             plugin.getLogger().warning(e.getMessage());
         }
@@ -108,13 +155,16 @@ public class CheckerEventHandler implements Listener {
 
         if (isPlayerOnCheck(quited_player)) {
             if (plugin.getConfig().getBoolean("check.on-disconnect.enabled", true)) {
+                quited_player.sendTitle("", "", 0, 0, 10);
                 quited_player.removeMetadata("sac_oncheck", plugin);
+
+                UUID mod_uuid = UUID.fromString(quited_player.getMetadata("sac_check_moderator").get(0).asString());
+                Player moderator = plugin.getServer().getPlayer(mod_uuid);
+
                 quited_player.removeMetadata("sac_check_moderator", plugin);
                 quited_player.removeMetadata("sac_beforecheck_pos", plugin);
 
-                quited_player.sendTitle("", "", 0, 0, 10);
-
-                executeBan(quited_player);
+                executeBan(quited_player, moderator);
             }
         } else if (quited_player.hasMetadata("sac_check_player") && quited_player.getMetadata("sac_check_player").get(0).asString() != "") {
             UUID moder_player_uuid = UUID.fromString(quited_player.getMetadata("sac_check_player").get(0).asString());
@@ -122,7 +172,7 @@ public class CheckerEventHandler implements Listener {
 
             if (Objects.equals(quited_player.getUniqueId().toString(), moder_player_uuid.toString())) return;
 
-            if (isPlayerOnCheck(player)) releasePlayer(player, quited_player);
+            if (isPlayerOnCheck(Objects.requireNonNull(player))) releasePlayer(player, quited_player);
         }
     }
 
@@ -150,6 +200,6 @@ public class CheckerEventHandler implements Listener {
 
         player.sendTitle("", "", 0, 0, 10);
 
-        player.sendMessage(Utils.color(plugin.getConfig().getString("messages.player.free-msg").replace("{moderator}", moderator.getName())));
+        player.sendMessage(utils.get_str("messages.player.free-msg", moderator, player));
     }
 }

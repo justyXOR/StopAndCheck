@@ -10,17 +10,21 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.xordev.stopAndCheck.Utils;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CheckerCommand implements CommandExecutor, TabCompleter {
     private final JavaPlugin plugin;
+    private final Utils utils;
 
     public CheckerCommand(JavaPlugin plugin) {
         this.plugin = plugin;
+        this.utils = new Utils(plugin);
     }
 
     @Override
@@ -34,7 +38,7 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
         }
 
         if (sender != null && !(sender.hasPermission("sac.command"))) {
-            sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.no-permission")));
+            sender.sendMessage(utils.get_str("messages.moderator.no-permission", sender, null));
             return true;
         }
 
@@ -49,11 +53,11 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             if (!(sender.hasPermission("sac.moder.check"))) {
-                sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.no-permission")));
+                sender.sendMessage(utils.get_str("messages.moderator.no-permission", sender, null));
                 return true;
             }
             if (strings.length < 2) {
-                sender.sendMessage(Utils.color("&c/sac check <player>"));
+                sender.sendMessage(utils.get_str("messages.usage", sender, null) + " /sac check <player>");
                 return true;
             }
 
@@ -61,22 +65,27 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
             Player player = plugin.getServer().getPlayer(playername);
 
             if (player == null) {
-                sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.player-offline")));
+                sender.sendMessage(utils.get_str("messages.moderator.player-offline", sender, null));
                 return true;
             }
 
             if (player == sender) {
-                sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.self-check")));
+                sender.sendMessage(utils.get_str("messages.moderator.self-check", sender, player));
                 return true;
             }
 
             if (player.hasMetadata("sac_check_player")) {
-                sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.is-checking")));
+                sender.sendMessage(utils.get_str("messages.moderator.is-checking", player, sender));
                 return true;
             }
 
             if (isPlayerOnCheck(player)) {
-                sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.already-check")));
+                sender.sendMessage(utils.get_str("messages.moderator.already-check", sender, player));
+                return true;
+            }
+
+            if (player.hasPermission("sac.immunity")) {
+                sender.sendMessage(utils.get_str("messages.moderator.player-has-perm", sender, player));
                 return true;
             }
 
@@ -86,31 +95,25 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
 
             sender.setMetadata("sac_check_player", new FixedMetadataValue(plugin, player.getUniqueId().toString()));
 
-            String title = Utils.color(plugin.getConfig().getString("messages.player.check-title", "Проверка на читы"));
-            String subtitle = Utils.color(plugin.getConfig().getString("messages.player.check-subtitle", "Инструкции в чате"));
+            String title = utils.get_str("messages.player.check-title", sender, player);
+            String subtitle = utils.get_str("messages.player.check-subtitle", sender, player);
 
             player.teleport(sender.getLocation());
 
             player.sendTitle(title, subtitle, 10, 999999, 0);
 
-            List<String> instructions = plugin.getConfig().getStringList("messages.player.check-chatmsg");
-            instructions.forEach(line -> {
-                String formatted = line
-                        .replace("{moderator}", sender.getName());
-                player.sendMessage(Utils.color(formatted));
-            });
+            List<String> instructions = utils.get_str_list("messages.player.check-chatmsg", sender, player);
+            instructions.forEach(player::sendMessage);
 
-            sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.successful-called").replace("{player}", playername)));
+            sender.sendMessage(utils.get_str("messages.moderator.successful-called", sender, player));
         } else if (strings[0].equalsIgnoreCase("free")) {
             if (sender != null && !(sender.hasPermission("sac.moder.free"))) {
-                sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.no-permission")));
+                sender.sendMessage(utils.get_str("messages.moderator.no-permission", null, null));
                 return true;
             }
 
             if (strings.length < 2) {
-                if (!(commandSender instanceof ConsoleCommandSender)) {
-                    sender.sendMessage(Utils.color("&c/sac free <player>"));
-                }
+                utils.sendMessage(commandSender, utils.get_str("messages.usage", sender, null) + " /sac free <player>");
                 return true;
             }
 
@@ -118,32 +121,28 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
             Player player = plugin.getServer().getPlayer(playername);
 
             if (player == null) {
-                if (!(commandSender instanceof ConsoleCommandSender)) {
-                    sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.player-offline")));
-                }
+                utils.sendMessage(commandSender, utils.get_str("messages.moderator.player-offline", sender, null));
                 return true;
             }
 
             if (player == sender) {
-                if (!(commandSender instanceof ConsoleCommandSender)) {
-                    sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.self-free")));
-                }
+                utils.sendMessage(commandSender, utils.get_str("messages.moderator.self-free", sender, player));
                 return true;
             }
 
             if (!(isPlayerOnCheck(player))) {
-                if (!(commandSender instanceof ConsoleCommandSender)) {
-                    sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.already-free").replace("{player}", player.getName())));
-                }
+                utils.sendMessage(commandSender, utils.get_str("messages.moderator.already-free", sender, player));
                 return true;
             }
 
             player.removeMetadata("sac_oncheck", plugin);
+
+            UUID playerModeratorUuid = UUID.fromString(player.getMetadata("sac_check_moderator").get(0).asString());
             player.removeMetadata("sac_check_moderator", plugin);
 
-            if (!(commandSender instanceof ConsoleCommandSender)) {
-                sender.removeMetadata("sac_check_player", plugin);
-            }
+            Player playerModerator = (Player) plugin.getServer().getPlayer(playerModeratorUuid);
+
+            playerModerator.removeMetadata("sac_check_player", plugin);
 
             Location oldPos = (Location) player.getMetadata("sac_beforecheck_pos").get(0).value();
 
@@ -153,10 +152,8 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
 
             player.sendTitle("", "", 0, 0, 10);
 
-            player.sendMessage(Utils.color(plugin.getConfig().getString("messages.player.free-msg").replace("{moderator}", sender.getName())));
-            if (!(commandSender instanceof ConsoleCommandSender)) {
-                sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.successful-free").replace("{player}", playername)));
-            }
+            player.sendMessage(utils.get_str("messages.player.free-msg", sender, player));
+            utils.sendMessage(commandSender, utils.get_str("messages.moderator.successful-free", sender, player));
         } else if (strings[0].equalsIgnoreCase("reload")) {
             if (commandSender instanceof ConsoleCommandSender || sender.hasPermission("sac.moder.reload")) {
                 try {
@@ -164,21 +161,74 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
                     if (commandSender instanceof ConsoleCommandSender) {
                         plugin.getLogger().log(Level.INFO, "[StopAndCheck] Successful config reload");
                     } else {
-                        sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.cfg-reload")));
+                        sender.sendMessage(utils.get_str("messages.cfg-reload", sender, null));
                     }
                 } catch (Exception err) {
                     if (commandSender instanceof ConsoleCommandSender) {
                         plugin.getLogger().log(Level.SEVERE, "[StopAndCheck] Error when reloading plugin!");
                         plugin.getLogger().log(Level.SEVERE, err.getMessage());
                     } else {
-                        sender.sendMessage(Utils.color("&c&lError when reloading plugin: &7" + err.getMessage()));
+                        sender.sendMessage(utils.color("&c&lError when reloading plugin: &7" + err.getMessage()));
                     }
                     return true;
                 }
             } else {
-                sender.sendMessage(Utils.color(plugin.getConfig().getString("messages.moderator.no-permission")));
+                sender.sendMessage(utils.get_str("messages.moderator.no-permission", sender, null));
                 return true;
             }
+        } else if (strings[0].equalsIgnoreCase("info")) {
+            if (sender != null && !sender.hasPermission("sac.moder.free")) {
+                sender.sendMessage(utils.get_str("messages.moderator.no-permission", sender, null));
+                return true;
+            }
+
+            if (strings.length < 2) {
+                utils.sendMessage(commandSender, utils.get_str("messages.usage", sender, null) + " /sac info <player>");
+                return true;
+            }
+
+            String playername = strings[1];
+            Player player = (Player) plugin.getServer().getPlayer(playername);
+
+            if (player == null) {
+                utils.sendMessage(commandSender, utils.get_str("messages.moderator.player-offline", sender, null));
+                return true;
+            }
+
+            List<String> lines = utils.get_str_list("messages.moderator.info", sender, player);
+
+            String status = plugin.getConfig().getString("messages.moderator.status-free", "Free");
+            String checking_player = plugin.getConfig().getString("messages.moderator.no", "&7No");
+            String checking_moderator = plugin.getConfig().getString("messages.moderator.no", "&7No");
+
+            if (player.hasMetadata("sac_oncheck") && player.getMetadata("sac_oncheck").get(0).asBoolean()) {
+                status = plugin.getConfig().getString("messages.moderator.status-oncheck", "On check");
+                UUID mod_uuid = UUID.fromString(player.getMetadata("sac_check_moderator").get(0).asString());
+                checking_moderator = Objects.requireNonNull(plugin.getServer().getPlayer(mod_uuid)).getName();
+                checking_player = plugin.getConfig().getString("messages.moderator.no", "&7No");
+            } else if (player.hasMetadata("sac_oncheck") && !player.getMetadata("sac_oncheck").get(0).asBoolean()) {
+                status = plugin.getConfig().getString("messages.moderator.status-free", "Free");
+                checking_moderator = plugin.getConfig().getString("messages.moderator.no", "&7No");
+                checking_player = plugin.getConfig().getString("messages.moderator.no", "&7No");
+            }
+
+            if (player.hasMetadata("sac_check_player") && !player.getMetadata("sac_cheking_player").get(0).asString().isEmpty()) {
+                status = plugin.getConfig().getString("messages.moderator.status-checking", "Checking");
+                checking_moderator = plugin.getConfig().getString("messages.moderator.no", "&7No");
+                UUID ply_uuid = UUID.fromString(player.getMetadata("sac_check_player").get(0).asString());
+                checking_player = Objects.requireNonNull(plugin.getServer().getPlayer(ply_uuid)).getName();
+            }
+
+            for (String line : lines) {
+                String fline = utils.color(line
+                        .replace("{info_status}", status)
+                        .replace("{checking_player}", checking_player)
+                        .replace("{checking_moderator}", checking_moderator));
+
+                utils.sendMessage(commandSender, fline);
+            }
+        } else {
+            send_help(commandSender);
         }
 
         return true;
@@ -187,7 +237,7 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] strings) {
         if (strings.length == 1) {
-            return Arrays.asList("check", "free", "info", "reload", "help").stream()
+            return Stream.of("check", "free", "info", "reload", "help")
                     .filter(action -> action.startsWith(strings[0].toLowerCase()))
                     .collect(Collectors.toList());
         } else if (strings.length == 2) {
@@ -202,11 +252,13 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
         return List.of();
     }
 
-    private void send_help(Player ply) {
-        List<String> help_text = plugin.getConfig().getStringList("messages.player.help");
-        help_text.forEach(line -> {
-            ply.sendMessage(Utils.color(line));
-        });
+    private void send_help(CommandSender sender) {
+        Player player = sender instanceof Player ? (Player) sender : null;
+        List<String> help_text = utils.get_str_list("messages.player.help", player, null);
+
+        for (String line : help_text) {
+            utils.sendMessage(sender, line);
+        }
     }
 
     private boolean isPlayerOnCheck(Player player) {

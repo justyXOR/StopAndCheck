@@ -6,15 +6,16 @@ import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import ru.xordev.stopAndCheck.commands.CheckerCommand;
 import ru.xordev.stopAndCheck.handlers.CheckerEventHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
 
 public final class Main extends JavaPlugin {
-
     @Override
     public void onEnable() {
         try {
@@ -33,8 +34,8 @@ public final class Main extends JavaPlugin {
 
             pm.addPermission(moderPerm);
 
-            pm.registerEvents(new CheckerEventHandler(this), this);
-            getServer().getPluginCommand("sac").setExecutor(new CheckerCommand(this));
+            pm.registerEvents(new CheckerEventHandler(this, new Utils(this)), this);
+            Objects.requireNonNull(getServer().getPluginCommand("sac")).setExecutor(new CheckerCommand(this));
 
             getServer().getLogger().log(Level.INFO," ");
             getServer().getLogger().log(Level.INFO,"-| StopAndCheck 1.0beta by XOR |-");
@@ -53,7 +54,7 @@ public final class Main extends JavaPlugin {
         getLogger().info("Cleaning up metadata...");
 
         for (Player player : getServer().getOnlinePlayers()) {
-            removeMetadataByPrefix(player, "sac_");
+            removeMetadataByPrefix(player);
             player.sendTitle("", "", 0, 0, 10);
         }
 
@@ -80,11 +81,11 @@ public final class Main extends JavaPlugin {
         }
     }
 
-    private void removeMetadataByPrefix(Player player, String prefix) {
-        List<MetadataValue> metadata = player.getMetadata(prefix);
-        for (MetadataValue meta : new ArrayList<>(player.getMetadata(prefix))) {
-            if (meta.getOwningPlugin().equals(this)) {
-                player.removeMetadata(prefix, this);
+    private void removeMetadataByPrefix(@NotNull Player player) {
+        List<MetadataValue> metadata = player.getMetadata("sac_");
+        for (MetadataValue meta : new ArrayList<>(player.getMetadata("sac_"))) {
+            if (Objects.equals(meta.getOwningPlugin(), this)) {
+                player.removeMetadata("sac_", this);
             }
         }
     }
