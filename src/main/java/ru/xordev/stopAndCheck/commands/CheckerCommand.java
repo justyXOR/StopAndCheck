@@ -216,23 +216,23 @@ public class CheckerCommand implements CommandExecutor, TabCompleter {
             List<String> lines = utils.get_str_list("messages.moderator.info", sender, player);
 
             String status = plugin.getConfig().getString("messages.moderator.status-free", "Free");
-            String checking_player = plugin.getConfig().getString("messages.moderator.no", "&7No");
-            String checking_moderator = plugin.getConfig().getString("messages.moderator.no", "&7No");
+            String checking_player = plugin.getConfig().getString("messages.moderator.none", "&7No");
+            String checking_moderator = plugin.getConfig().getString("messages.moderator.none", "&7No");
 
             if (player.hasMetadata("sac_oncheck") && player.getMetadata("sac_oncheck").get(0).asBoolean()) {
                 status = plugin.getConfig().getString("messages.moderator.status-oncheck", "On check");
                 UUID mod_uuid = UUID.fromString(player.getMetadata("sac_check_moderator").get(0).asString());
                 checking_moderator = Objects.requireNonNull(plugin.getServer().getPlayer(mod_uuid)).getName();
-                checking_player = plugin.getConfig().getString("messages.moderator.no", "&7No");
+                checking_player = plugin.getConfig().getString("messages.moderator.none", "&7No");
             } else if (player.hasMetadata("sac_oncheck") && !player.getMetadata("sac_oncheck").get(0).asBoolean()) {
                 status = plugin.getConfig().getString("messages.moderator.status-free", "Free");
-                checking_moderator = plugin.getConfig().getString("messages.moderator.no", "&7No");
-                checking_player = plugin.getConfig().getString("messages.moderator.no", "&7No");
+                checking_moderator = plugin.getConfig().getString("messages.moderator.none", "&7No");
+                checking_player = plugin.getConfig().getString("messages.moderator.none", "&7No");
             }
 
             if (player.hasMetadata("sac_check_player") && !player.getMetadata("sac_cheking_player").get(0).asString().isEmpty()) {
                 status = plugin.getConfig().getString("messages.moderator.status-checking", "Checking");
-                checking_moderator = plugin.getConfig().getString("messages.moderator.no", "&7No");
+                checking_moderator = plugin.getConfig().getString("messages.moderator.none", "&7No");
                 UUID ply_uuid = UUID.fromString(player.getMetadata("sac_check_player").get(0).asString());
                 checking_player = Objects.requireNonNull(plugin.getServer().getPlayer(ply_uuid)).getName();
             }

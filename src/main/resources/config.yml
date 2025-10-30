@@ -1,9 +1,13 @@
-#  StopAndCheck 1.2-BETA
+#  StopAndCheck 1.2.2
 #  https://github.com/justyXOR/StopAndCheck
 
 #  Placeholders:
 #    {player} - Replaced by the specified player in the command
 #    {executor} - Replaced by the player who executed the command
+
+config-version: 2   # DO NOT TOUCH THIS PARAMETER!
+
+ignore-chat-prefixes: ["!", "?"]  # Don't support placeholders
 
 check:
   teleport:
@@ -33,12 +37,12 @@ messages:
     status-oncheck: "&c&lOn check"
     status-checking: "&b&lChecking another player"
     status-free: "&a&lFree"
-    no: "&7No"
+    none: "&7No"
     info:
       - ""
       - "&6&lInformation about &7{player}"
       - ""
-      - "&7Status: {info_status}"   #THESE PLACEHOLDERS WORK ONLY HERE
+      - "&7Status: {info_status}"
       - "&7Checking player: &6{checking_player}"
       - "&7Checking moderator: &6{checking_moderator}"
       - ""

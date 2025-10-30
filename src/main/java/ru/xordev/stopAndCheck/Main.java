@@ -10,6 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import ru.xordev.stopAndCheck.commands.CheckerCommand;
 import ru.xordev.stopAndCheck.handlers.CheckerEventHandler;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +24,13 @@ public final class Main extends JavaPlugin {
         try {
             saveDefaultConfig();
             PluginManager pm = getServer().getPluginManager();
+
+            int currentConfigVersion = getConfig().getInt("config-version", -1);
+            int latestConfigVersion = 2;
+
+            if (currentConfigVersion < latestConfigVersion) {
+                migrateConfig(currentConfigVersion, latestConfigVersion);
+            }
 
             pm.addPermission(new Permission("sac.command", "Access to /sac command", PermissionDefault.OP));
             pm.addPermission(new Permission("sac.immunity", "Deny send player to checks", PermissionDefault.OP));
@@ -38,7 +48,7 @@ public final class Main extends JavaPlugin {
             Objects.requireNonNull(getServer().getPluginCommand("sac")).setExecutor(new CheckerCommand(this));
 
             getServer().getLogger().log(Level.INFO," ");
-            getServer().getLogger().log(Level.INFO,"-| StopAndCheck 1.2.1beta by XOR |-");
+            getServer().getLogger().log(Level.INFO,"-| StopAndCheck 1.2.2 by XOR |-");
             getServer().getLogger().log(Level.INFO,"All releases here: https://github.com/justyXOR/StopAndCheck");
             getServer().getLogger().log(Level.INFO," ");
             getServer().getLogger().log(Level.INFO,"Plugin is ready to work!");
@@ -46,6 +56,37 @@ public final class Main extends JavaPlugin {
         } catch (Exception e) {
             getLogger().log(Level.SEVERE,"Error when enabling plugin!", e);
             getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+
+    private void migrateConfig(int fromVersion, int toVersion) {
+        getLogger().warning(" ");
+        getLogger().warning("⚠️ CONFIG MIGRATION REQUIRED!");
+        getLogger().warning("Current config version: " + fromVersion);
+        getLogger().warning("Latest config version: " + toVersion);
+        getLogger().warning("Creating backup and generating new config...");
+
+        try {
+            File configFile = new File(getDataFolder(), "config.yml");
+            File backupFile = new File(getDataFolder(), "config.yml.backup-v" + fromVersion);
+
+            if (configFile.exists()) {
+                Files.copy(configFile.toPath(), backupFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                getLogger().info("✓ Backup created: " + backupFile.getName());
+            }
+
+            if (configFile.delete()) {
+                saveDefaultConfig();
+                reloadConfig();
+                getLogger().info("✓ New config generated successfully!");
+            }
+
+            getLogger().warning("⚠️ Please check new config.yml and adjust settings if needed!");
+            getLogger().warning(" ");
+
+        } catch (Exception e) {
+            getLogger().severe("✗ Config migration failed!");
+            getLogger().severe("Error: " + e.getMessage());
         }
     }
 

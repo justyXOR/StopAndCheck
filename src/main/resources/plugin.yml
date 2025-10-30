@@ -1,5 +1,5 @@
 name: StopAndCheck
-version: '1.2.1-Beta'
+version: '1.2.2'
 main: ru.xordev.stopAndCheck.Main
 api-version: '1.18'
 prefix: SAC

@@ -1,6 +1,7 @@
 package ru.xordev.stopAndCheck.handlers;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -9,12 +10,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.inventory.InventoryAction;
-import org.bukkit.event.inventory.InventoryEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 import ru.xordev.stopAndCheck.Utils;
 
 import java.util.List;
@@ -31,7 +30,7 @@ public class CheckerEventHandler implements Listener {
     }
 
     @EventHandler
-    public void checkPlayerMove(PlayerMoveEvent e) {
+    public void checkPlayerMove(@NotNull PlayerMoveEvent e) {
         Player player = e.getPlayer();
 
         if (isPlayerOnCheck(player)) {
@@ -43,7 +42,7 @@ public class CheckerEventHandler implements Listener {
     }
 
     @EventHandler
-    public void checkPlayerCommand(PlayerCommandPreprocessEvent e) {
+    public void checkPlayerCommand(@NotNull PlayerCommandPreprocessEvent e) {
         Player player = e.getPlayer();
 
         if (isPlayerOnCheck(player)) {
@@ -52,7 +51,7 @@ public class CheckerEventHandler implements Listener {
     }
 
     @EventHandler
-    public void checkPlayerDropItem(PlayerDropItemEvent e) {
+    public void checkPlayerDropItem(@NotNull PlayerDropItemEvent e) {
         Player player = e.getPlayer();
 
         if (isPlayerOnCheck(player)) {
@@ -61,7 +60,7 @@ public class CheckerEventHandler implements Listener {
     }
 
     @EventHandler
-    public void checkPlayerBreakBlock(BlockBreakEvent e) {
+    public void checkPlayerBreakBlock(@NotNull BlockBreakEvent e) {
         Player player = e.getPlayer();
 
         if (isPlayerOnCheck(player)) {
@@ -70,7 +69,7 @@ public class CheckerEventHandler implements Listener {
     }
 
     @EventHandler
-    public void checkPlayerDamage(EntityDamageEvent e) {
+    public void checkPlayerDamage(@NotNull EntityDamageEvent e) {
         if (e.getEntity() instanceof Player player) {
             if (isPlayerOnCheck(player)) {
                 e.setCancelled(true);
@@ -79,7 +78,7 @@ public class CheckerEventHandler implements Listener {
     }
 
     @EventHandler
-    public void checkPlayerAttack(EntityDamageByEntityEvent e) {
+    public void checkPlayerAttack(@NotNull EntityDamageByEntityEvent e) {
         if (e.getDamager() instanceof Player damager) {
             if (isPlayerOnCheck(damager)) {
                 e.setCancelled(true);
@@ -95,7 +94,7 @@ public class CheckerEventHandler implements Listener {
     }
 
     @EventHandler
-    public void checkPlayerUseItem(PlayerInteractEvent e) {
+    public void checkPlayerUseItem(@NotNull PlayerInteractEvent e) {
         Player player = e.getPlayer();
         if (isPlayerOnCheck(player) && (
                 e.getAction() == Action.RIGHT_CLICK_AIR ||
@@ -110,11 +109,20 @@ public class CheckerEventHandler implements Listener {
     }
 
     @EventHandler
-    public void checkPlayerChat(AsyncPlayerChatEvent e) {
+    public void checkPlayerChat(@NotNull AsyncPlayerChatEvent e) {
         Player player = e.getPlayer();
+        String text = e.getMessage();
+
+        List<String> ignoredPrefixes = plugin.getConfig().getStringList("ignore-chat-prefixes");
+        if (!(ignoredPrefixes.isEmpty())) {
+            for (String prefix : ignoredPrefixes) {
+                if (text.startsWith(prefix.toLowerCase())) {
+                    return;
+                }
+            }
+        }
 
         if (isPlayerOnCheck(player)) {
-            String text = e.getMessage();
             UUID mod_uuid = UUID.fromString(player.getMetadata("sac_check_moderator").get(0).asString());
 
             Player moderator = plugin.getServer().getPlayer(mod_uuid);
@@ -127,19 +135,25 @@ public class CheckerEventHandler implements Listener {
             moderator.sendMessage(utils.color(playerMsg));
             player.sendMessage(utils.color(targetMsg));
         } else if (player.hasMetadata("sac_check_player")) {
-            String text = e.getMessage();
-            UUID ply_uuid = UUID.fromString(player.getMetadata("sac_check_player").get(0).asString());
+            if (!(messageHasPrefix(utils.get_str_list("ignore-chat-prefixes", player, null), text))) {
+                UUID ply_uuid = UUID.fromString(player.getMetadata("sac_check_player").get(0).asString());
 
-            Player ply = plugin.getServer().getPlayer(ply_uuid);
+                Player ply = plugin.getServer().getPlayer(ply_uuid);
 
-            e.setCancelled(true);
+                e.setCancelled(true);
 
-            String playerMsg = utils.get_str("messages.check-chat-tag", player, null) + "&7" + player.getName() + ": &r" + text;
-            String targetMsg = utils.get_str("messages.you-tag", player, null) + utils.get_str("messages.check-chat-tag", player, null) + " " + text;
+                String playerMsg = utils.get_str("messages.check-chat-tag", player, null) + "&7" + player.getName() + ": &r" + text;
+                String targetMsg = utils.get_str("messages.you-tag", player, null) + utils.get_str("messages.check-chat-tag", player, null) + " " + text;
 
-            ply.sendMessage(utils.color(playerMsg));
-            player.sendMessage(utils.color(targetMsg));
+                ply.sendMessage(utils.color(playerMsg));
+                player.sendMessage(utils.color(targetMsg));
+            }
         }
+    }
+
+    private boolean messageHasPrefix(@NotNull List<String> prefixes, @NotNull String msg) {
+        if (msg.isEmpty() || prefixes.isEmpty()) return false;
+        return prefixes.stream().anyMatch(msg::startsWith);
     }
 
     private void executeBan(Player player, Player mod) {
@@ -153,7 +167,7 @@ public class CheckerEventHandler implements Listener {
     }
 
     @EventHandler
-    public void playerLeave(PlayerQuitEvent e) {
+    public void playerLeave(@NotNull PlayerQuitEvent e) {
         Player quited_player = e.getPlayer();
 
         if (isPlayerOnCheck(quited_player)) {
@@ -167,6 +181,15 @@ public class CheckerEventHandler implements Listener {
                 quited_player.removeMetadata("sac_check_moderator", plugin);
                 quited_player.removeMetadata("sac_beforecheck_pos", plugin);
 
+                moderator.removeMetadata("sac_check_player", plugin);
+
+                if (plugin.getConfig().getBoolean("check.teleport.enabled")) {
+                    Location mod_pos = (Location) moderator.getMetadata("sac_beforecheck_pos").get(0).value();
+                    moderator.teleport(mod_pos);
+
+                    moderator.removeMetadata("sac_beforecheck_pos", plugin);
+                }
+
                 executeBan(quited_player, moderator);
             }
         } else if (quited_player.hasMetadata("sac_check_player") && quited_player.getMetadata("sac_check_player").get(0).asString() != "") {
@@ -179,7 +202,7 @@ public class CheckerEventHandler implements Listener {
         }
     }
 
-    private boolean isPlayerOnCheck(Player player) {
+    private boolean isPlayerOnCheck(@NotNull Player player) {
         if (!player.hasMetadata("sac_oncheck")) {
             return false;
         }
@@ -195,7 +218,7 @@ public class CheckerEventHandler implements Listener {
         }
     }
 
-    private void releasePlayer(Player player, Player moderator) {
+    private void releasePlayer(@NotNull Player player, @NotNull Player moderator) {
         player.removeMetadata("sac_oncheck", plugin);
         player.removeMetadata("sac_check_moderator", plugin);
 
