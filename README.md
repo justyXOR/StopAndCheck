@@ -7,8 +7,8 @@
 *Plugin for call players to cheat checking.* <br>
 
 **Versions:** 1.18.2 and higher (JDK 17+)<br>
-**Developed for:** Paper<br>
-**Download from:** [Modrinth](https://modrinth.com/plugin/stopandcheck), [PaperMC](https://hangar.papermc.io/xordev/StopAndCheck)
+**Developed for:** Paper, Spigot<br>
+**Download from:** [Modrinth](https://modrinth.com/plugin/stopandcheck), [PaperMC](https://hangar.papermc.io/xordev/StopAndCheck), [SpigotMC](https://www.spigotmc.org/resources/stopandcheck.129585/)
 
 # Commands
 `/sac` - Main command. Show help menu.<br>
